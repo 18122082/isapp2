@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <script type="text/javascript" src="../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../lib/osql.js"></script>
+
+    <script>
+        osql.requireLogin();
+
+        async function button2Pressed(){
+            doInsert();
+            doSelect();
+        }
+    
+        async function doSelect() {
+            var searchTerm = document.getElementById('searchTerm').value; // 検索語句を取得
+            var sql = `select * from Tweets where tweet like '%${searchTerm}%' order by time desc limit 20`;
+            var objects = await osql.connect(sql);
+            console.log(objects);
+            var html = '<h2>ツイート一覧</h2><ul>'; // ツイート表示の見出し
+            for (var i = 0; i < objects.length; i++) {
+                var object = objects[i];
+                html += '<li>' + object.name + ',' + object.tweet + ',' + object.time + '</li>';
+            }
+            html += '</ul>';
+            document.getElementById('tweetList').innerHTML = html;
+        }
+
+        async function button1Pressed() {
+            doInsert();
+            doSelect();
+        }
+
+        async function doInsert() {
+            var userid = document.getElementById('tf1').value;
+            var tweet = document.getElementById('tf2').value;
+
+            var sql = `insert into Tweets (name, tweet, time) values("${userid}", "${tweet}", now());`;
+            var objects = await osql.connect(sql);
+            console.log(objects);
+
+            document.getElementById('result').innerHTML = "tweetしました";
+
+            // テキストボックスをクリアする
+            document.getElementById('tf1').value = '';
+            document.getElementById('tf2').value = '';
+        }
+    </script>
+
+</head>
+
+<body>
+    <h1>Tweets</h1>
+    <br>
+    名前:<input id="tf1" value="名無し" type="textfield">
+    <br>
+    tweet:<input id="tf2" type="textfield">
+    <button onclick="button2Pressed()">tweet</button>
+    <br>
+    <div id="result"></div> <!-- ツイート成功メッセージ表示用 -->
+    <hr>
+    <h2>検索</h2>
+    <input type="text" id="searchTerm" placeholder="検索語句を入力">
+    <button onclick="button1Pressed()">検索</button> <!-- 検索ボタン -->
+    <br>
+    <div id="tweetList"></div> <!-- ツイート表示用 -->
+</body>
+
+</html>
